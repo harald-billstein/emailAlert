@@ -1,53 +1,59 @@
 package com.woodtailer.emailalertplugin.controllers;
 
-import com.woodtailer.emailalertplugin.mailservice.EmailSubscribers;
 import com.woodtailer.emailalertplugin.mailservice.MailService;
+import com.woodtailer.emailalertplugin.model.Subscriber;
+import com.woodtailer.emailalertplugin.model.TriggerWord;
+import com.woodtailer.emailalertplugin.persistentstorstorage.SubscriberRepository;
 import com.woodtailer.emailalertplugin.socketclient.MyMessageHandler;
 import com.woodtailer.emailalertplugin.socketclient.MyMessageHandlerInterface;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 @Controller
 public class MainController implements MyMessageHandlerInterface {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
-
-  private final EmailSubscribers subscribers;
   private final MailService mailService;
   private final MyMessageHandler myMessageHandler;
+  private SubscriberRepository subscriberRepository;
 
-  @Value("${socket}")
-  private String url;
 
-  public MainController(MailService mailService, EmailSubscribers subscribers,
+  public MainController(SubscriberRepository subscriberRepository, MailService mailService,
       MyMessageHandler myMessageHandler) {
     this.mailService = mailService;
-    this.subscribers = subscribers;
     this.myMessageHandler = myMessageHandler;
+    this.subscriberRepository = subscriberRepository;
     myMessageHandler.setListener(this);
   }
 
-  public void startApplication() {
-    myMessageHandler.connect(url);
-  }
-
-
-  private void sendMail(String message) {
-
-
-    if (subscribers.getAddresses().size() == 0) {
-      LOGGER.info("NO SUBSCRIBERS TO NOTIFY");
-    } else {
-      mailService.sendMailToSubscribers(message, subscribers.getAddresses());
-    }
+  public void start() {
+    LOGGER.info("CONNECTING TO SOCKET");
+    myMessageHandler.connect();
   }
 
   @Override
   public void update(String s) {
-    if (s.equals("WARN") || s.equals("ERROR")) {
-      sendMail(s);
+    LOGGER.info("MainController send method: " + s);
+
+    Iterable<Subscriber> tempUsers = subscriberRepository.findAll();
+    Iterator<Subscriber> users = tempUsers.iterator();
+    List<String> mailaddressesToAlert = new ArrayList<>();
+
+    while (users.hasNext()) {
+      Subscriber subscriber = users.next();
+      Set<TriggerWord> tempWords = subscriber.getTriggerWords();
+
+      for (TriggerWord tempWord : tempWords) {
+        if (s.contains(tempWord.getWord())) {
+          mailaddressesToAlert.add(subscriber.getEmailAddress());
+          mailService.sendMailToSubscribers(s, mailaddressesToAlert);
+        }
+      }
     }
   }
 }

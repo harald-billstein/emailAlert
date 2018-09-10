@@ -48,7 +48,7 @@ public class MailService {
       InputStream inputStream = new ClassPathResource("mailtemplet.html").getInputStream();
       IOUtils.copy(inputStream, writer, "utf-8");
       helper.setText(writer.toString().replace("logmessage", emailMessage), true);
-      helper.setText(emailMessage, true);
+      helper.setText(writer.toString(), true);
       helper.addTo(emailAddress);
     } catch (Exception ex) {
       ex.getStackTrace();
