@@ -1,6 +1,5 @@
 package com.woodtailer.emailalertplugin.model;
 
-import java.sql.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -26,7 +25,7 @@ public class Subscriber {
   @Column(unique = true)
   private String emailAddress;
   private long mailSentToSubscriber;
-  private Date date;
+  private long timeStamp;
 
   @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   @JoinTable(
@@ -60,12 +59,13 @@ public class Subscriber {
     this.mailSentToSubscriber = mailSentToSubscriber;
   }
 
-  public Date getDate() {
-    return date;
+  public long getTimeStamp() {
+    return timeStamp;
   }
 
-  public void setDate(Date date) {
-    this.date = date;
+  public void setTimeStamp(
+      long timeStamp) {
+    this.timeStamp = timeStamp;
   }
 
   public Set<TriggerWord> getTriggerWords() {

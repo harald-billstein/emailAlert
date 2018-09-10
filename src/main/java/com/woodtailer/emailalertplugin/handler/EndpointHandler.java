@@ -5,8 +5,7 @@ import com.woodtailer.emailalertplugin.model.MailResponse;
 import com.woodtailer.emailalertplugin.model.Subscriber;
 import com.woodtailer.emailalertplugin.model.TriggerWord;
 import com.woodtailer.emailalertplugin.persistentstorstorage.SubscriberRepository;
-import com.woodtailer.emailalertplugin.utility.EmailVerifier;
-import java.sql.Date;
+import com.woodtailer.emailalertplugin.utility.EmailUtil;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,14 +29,12 @@ public class EndpointHandler {
     MailResponse mailResponse = new MailResponse();
     Subscriber subscriber = new Subscriber();
 
-    boolean isValidEmail = EmailVerifier.validateMailaddress(request.getEmailAddress());
-
-    // TODO FIX THIS MESS
+    boolean isValidEmail = EmailUtil.validateMailaddress(request.getEmailAddress());
 
     if (isValidEmail) {
       subscriber.setEmailAddress(request.getEmailAddress());
       subscriber.setMailSentToSubscriber(0);
-      subscriber.setDate(new Date(0));
+      subscriber.setTimeStamp(System.currentTimeMillis() - 1800000);
       subscriber.setTriggerWords(extractWordsToASet(request.getWords()));
       try {
         subscriberRepository.save(subscriber);
@@ -73,9 +70,28 @@ public class EndpointHandler {
     return setOfTriggerWords;
   }
 
-  // TODO REMOVE EMAIL FROM DB
+  public MailResponse removeEmailAddress(String email) {
 
-  // TODO CHECK WHEN LAST MAIL WAS SENT, MAX 1 MAIL EVERY 30 MIN
+    MailResponse mailResponse = new MailResponse();
+
+    Iterable<Subscriber> subscribers = subscriberRepository.findAll();
+    for (Subscriber subscriber : subscribers) {
+
+      if (subscriber.getEmailAddress().equals(email)) {
+        subscriberRepository.delete(subscriber);
+        mailResponse.setSuccess(true);
+        mailResponse.setRegisteredMail(email);
+        mailResponse.setMessage("EMAIL REMOVED");
+      } else {
+        LOGGER.info("USER NOT FOUND");
+        mailResponse.setSuccess(false);
+        mailResponse.setRegisteredMail(email);
+        mailResponse.setMessage("EMAIL NOT FOUND");
+      }
+    }
+
+    return mailResponse;
+  }
 
 
 }

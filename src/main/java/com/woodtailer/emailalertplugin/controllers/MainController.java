@@ -6,6 +6,7 @@ import com.woodtailer.emailalertplugin.model.TriggerWord;
 import com.woodtailer.emailalertplugin.persistentstorstorage.SubscriberRepository;
 import com.woodtailer.emailalertplugin.socketclient.MyMessageHandler;
 import com.woodtailer.emailalertplugin.socketclient.MyMessageHandlerInterface;
+import com.woodtailer.emailalertplugin.utility.EmailUtil;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,8 @@ public class MainController implements MyMessageHandlerInterface {
     myMessageHandler.connect();
   }
 
+
+  // TODO CLEAN UP THIS MESS
   @Override
   public void update(String s) {
     LOGGER.info("MainController send method: " + s);
@@ -51,7 +54,16 @@ public class MainController implements MyMessageHandlerInterface {
       for (TriggerWord tempWord : tempWords) {
         if (s.contains(tempWord.getWord())) {
           mailaddressesToAlert.add(subscriber.getEmailAddress());
-          mailService.sendMailToSubscribers(s, mailaddressesToAlert);
+
+          if (!EmailUtil.userBeenSpammed(subscriber)) {
+            LOGGER.info("ALERT MAIL SENT TO : " + subscriber.getEmailAddress());
+            subscriber.setTimeStamp(System.currentTimeMillis());
+            subscriberRepository.save(subscriber);
+            mailService.sendMailToSubscribers(s, mailaddressesToAlert);
+
+          } else {
+            LOGGER.warn(subscriber.getEmailAddress() + " WAS ALERTED RECENTLY, SPAM PROTECTION");
+          }
         }
       }
     }
