@@ -58,7 +58,6 @@ public class EndpointHandler {
     return mailResponse;
   }
 
-
   private Set<TriggerWord> extractWordsToASet(ArrayList<String> words) {
 
     Set<TriggerWord> setOfTriggerWords = new HashSet<>();
@@ -91,7 +90,6 @@ public class EndpointHandler {
 
     return mailResponse;
   }
-
 
   public WordResponse addWatchWordToSubscriber(String email, String word) {
     WordResponse wordResponse = new WordResponse();
