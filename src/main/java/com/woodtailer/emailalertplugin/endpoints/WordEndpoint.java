@@ -1,7 +1,8 @@
 package com.woodtailer.emailalertplugin.endpoints;
 
 
-import com.woodtailer.emailalertplugin.model.MailResponse;
+import com.woodtailer.emailalertplugin.handler.EndpointHandler;
+import com.woodtailer.emailalertplugin.model.WordResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +18,22 @@ public class WordEndpoint {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WordEndpoint.class);
 
+  private final EndpointHandler endpointHandler;
+
+  public WordEndpoint(EndpointHandler endpointHandler) {
+    this.endpointHandler = endpointHandler;
+  }
+
 
   @PostMapping(path = "/words/")
-  public ResponseEntity<MailResponse> addWord(@RequestParam String email,
+  public ResponseEntity<WordResponse> addWord(@RequestParam String email,
       @RequestParam String word) {
-    LOGGER.info("ADD : " + email + " : " + word);
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok(endpointHandler.addWatchWordToSubscriber(email, word));
   }
 
   @DeleteMapping(path = "/words/")
-  public ResponseEntity<MailResponse> removeWord(@RequestParam String email,
+  public ResponseEntity<WordResponse> removeWord(@RequestParam String email,
       @RequestParam String word) {
-    LOGGER.info("REMOVE : " + email + " : " + word);
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok(endpointHandler.removeWordFromSubscriber(email, word));
   }
 }

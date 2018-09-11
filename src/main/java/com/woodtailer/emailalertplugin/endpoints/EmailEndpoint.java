@@ -23,7 +23,6 @@ public class EmailEndpoint {
 
   public EmailEndpoint(EndpointHandler endpointHandler) {
     this.endpointHandler = endpointHandler;
-
   }
 
   @PutMapping(path = "/addresses/")

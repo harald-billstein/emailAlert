@@ -48,7 +48,7 @@ public class MyMessageHandler extends TextWebSocketHandler {
 
   @Override
   public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
-    LOGGER.info("handleMessage : " + message.getPayload());
+    //LOGGER.info("handleMessage : " + message.getPayload());
     listener.update(String.valueOf(message.getPayload()));
   }
 
