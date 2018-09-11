@@ -57,7 +57,7 @@ public class MainController implements MyMessageHandlerInterface {
           mailaddressesToAlert.add(subscriber.getEmailAddress());
 
           if (!EmailUtil.userBeenSpammed(subscriber)) {
-            //mailService.sendMailToSubscribers(incomingMessage, mailaddressesToAlert);
+            mailService.sendMailToSubscribers(incomingMessage, mailaddressesToAlert);
             subscriber.setTimeStamp(System.currentTimeMillis());
             subscriberRepositoryIMP.saveSubscriber(subscriber);
             LOGGER.info("ALERT MAIL SENT TO : " + subscriber.getEmailAddress());
